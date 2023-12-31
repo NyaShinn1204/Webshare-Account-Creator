@@ -47,38 +47,6 @@ def get_email():
 email = get_email()
 password = get_password()
 
-def verify_email():
-    try:
-        poipoi_session = requests.session()
-        poipoi_session.cookies.set('cookie_csrf_token', poipoi_token)
-        poipoi_session.cookies.set('cookie_sessionhash', poipoi_sessionhash)
-        while True:
-            response = poipoi_session.get(f'https://m.kuku.lu/recv._ajax.php?&q={email} Activate Your Webshare Account&csrf_token_check={poipoi_token}')
-            soup = BeautifulSoup(response.text, 'html.parser')
-            if soup.find('span', attrs={'class':'view_listcnt'}).contents[0] == '1':
-                break
-            time.sleep(2)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        mail_element = soup.find('div', attrs={'class':'main-content'}).find('div', attrs={'style':'z-index:99;'})
-        script_element = mail_element.parent.find_all('script')[2]
-        parsed_javascript = re.findall(r'\'.*\'', script_element.string)
-        num = parsed_javascript[1].split(',')[0].replace('\'', '')
-        key = parsed_javascript[1].split(',')[1].replace('\'', '').replace(' ', '')
-        
-        response = poipoi_session.post('https://m.kuku.lu/smphone.app.recv.view.php', data={'num':num, 'key':key})
-        soup = BeautifulSoup(response.text, 'html.parser')
-        verify_redirect_url = soup.find('a', href=re.compile("gateway.aquapal.net/jump.php?")).attrs['href']
-        response = requests.get(verify_redirect_url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        script_element = soup.find('script')
-        verify_url = script_element.contents[0].replace('\n', '').replace('\t', '').replace('setTimeout(function(){location.href = "', '').replace('";}, 1);', '')
-        response = requests.get(verify_url, headers=headers)
-        print("[+] Success Create Account!!")
-    except:
-        print("[-] Failed Verify Email\nPlease Self")
-    print(f"[+] Email: {email}")
-    print(f"[+] Password: {password}")
-
 
 def recognize(audio_url: str) -> str:
     seg = AudioSegment.from_file(io.BytesIO(requests.get(audio_url).content))
@@ -117,8 +85,35 @@ def bytedance():
             verify.click('//button[@id="recaptcha-verify-button"]')
             page.wait_for_timeout(1000)
             print("[+] Success Recaptcha Bypass")
-            time.sleep(5)
-            verify_email()
+            page.wait_for_timeout(5000)
+            print("Verifying...")
+            try:
+                poipoi_session = requests.session()
+                poipoi_session.cookies.set('cookie_csrf_token', poipoi_token)
+                poipoi_session.cookies.set('cookie_sessionhash', poipoi_sessionhash)
+                while True:
+                    response = poipoi_session.get(f'https://m.kuku.lu/recv._ajax.php?&q={email} Activate Your Webshare Account&csrf_token_check={poipoi_token}')
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    if soup.find('span', attrs={'class':'view_listcnt'}).contents[0] == '1':
+                        break
+                    time.sleep(2)
+                soup = BeautifulSoup(response.text, 'html.parser')
+                mail_element = soup.find('div', attrs={'class':'main-content'}).find('div', attrs={'style':'z-index:99;'})
+                script_element = mail_element.parent.find_all('script')[2]
+                parsed_javascript = re.findall(r'\'.*\'', script_element.string)
+                num = parsed_javascript[1].split(',')[0].replace('\'', '')
+                key = parsed_javascript[1].split(',')[1].replace('\'', '').replace(' ', '')
+                
+                response = poipoi_session.post('https://m.kuku.lu/smphone.app.recv.view.php', data={'num':num, 'key':key})
+                soup = BeautifulSoup(response.text, 'html.parser')
+                verify_redirect_url = soup.find('a', href=re.compile("gateway.aquapal.net/jump.php?")).attrs['href']
+                page.goto(verify_redirect_url)
+                print("[+] Success Verify Account!!")
+                page.wait_for_timeout(5500)
+            except:
+                print("[-] Failed Verify Email\nPlease Self")
+            print(f"[+] Email: {email}")
+            print(f"[+] Password: {password}")
         except Exception as error:
             print(f"[-] Failed Recaptcha Solve {error}")
         browser.close()

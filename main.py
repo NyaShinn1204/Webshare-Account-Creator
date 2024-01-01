@@ -75,7 +75,7 @@ def bytedance():
         page.get_by_test_id("password-input").fill(password)
         print(f"[+] Password: {password}")
         page.get_by_test_id("signup-button").click()
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(5500)
         verify = page.frame(name=page.locator('//iframe[starts-with(@src,"https://www.google.com/recaptcha/api2/bframe?")]').get_attribute('name'))
         verify.click('//button[@id="recaptcha-audio-button"]')
         try:
@@ -85,8 +85,8 @@ def bytedance():
             verify.click('//button[@id="recaptcha-verify-button"]')
             page.wait_for_timeout(1000)
             print("[+] Success Recaptcha Bypass")
-            page.wait_for_timeout(5000)
             print("Verifying...")
+            page.wait_for_timeout(7500)
             try:
                 poipoi_session = requests.session()
                 poipoi_session.cookies.set('cookie_csrf_token', poipoi_token)
@@ -107,7 +107,9 @@ def bytedance():
                 response = poipoi_session.post('https://m.kuku.lu/smphone.app.recv.view.php', data={'num':num, 'key':key})
                 soup = BeautifulSoup(response.text, 'html.parser')
                 verify_redirect_url = soup.find('a', href=re.compile("gateway.aquapal.net/jump.php?")).attrs['href']
+                print(verify_redirect_url)
                 page.goto(verify_redirect_url)
+                page.wait_for_timeout(5500)
                 print("[+] Success Verify Account!!")
                 page.wait_for_timeout(5500)
             except:

@@ -106,13 +106,14 @@ def bytedance():
                 
                 response = poipoi_session.post('https://m.kuku.lu/smphone.app.recv.view.php', data={'num':num, 'key':key})
                 soup = BeautifulSoup(response.text, 'html.parser')
-                verify_redirect_url = soup.find('a', href=re.compile("gateway.aquapal.net/jump.php?")).attrs['href']
+                verify_redirect_url = soup.find('a', href=re.compile("gateway.aquapal.net/jump.php?", text="Verify Email")).attrs['href']
                 print(verify_redirect_url)
                 page.goto(verify_redirect_url)
                 page.wait_for_timeout(5500)
                 print("[+] Success Verify Account!!")
                 page.wait_for_timeout(5500)
-            except:
+            except Exception as error:
+                print(error)
                 print("[-] Failed Verify Email\nPlease Self")
             print(f"[+] Email: {email}")
             print(f"[+] Password: {password}")

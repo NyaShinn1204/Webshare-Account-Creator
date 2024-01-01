@@ -91,22 +91,23 @@ def bytedance():
                 poipoi_session = requests.session()
                 poipoi_session.cookies.set('cookie_csrf_token', poipoi_token)
                 poipoi_session.cookies.set('cookie_sessionhash', poipoi_sessionhash)
+                # メールが既読状態だと取得に失敗します
                 while True:
                     response = poipoi_session.get(f'https://m.kuku.lu/recv._ajax.php?&q={email} Activate Your Webshare Account&csrf_token_check={poipoi_token}')
                     soup = BeautifulSoup(response.text, 'html.parser')
-                    if soup.find('span', attrs={'class':'view_listcnt'}).contents[0] == '1':
-                        break
+                    if soup.find('span', attrs={'class':'view_listcnt'}).contents[0] == '1': #検索結果が1だったら
+                        break #ループ終了
                     time.sleep(2)
+                 # 以下url検出
                 soup = BeautifulSoup(response.text, 'html.parser')
                 mail_element = soup.find('div', attrs={'class':'main-content'}).find('div', attrs={'style':'z-index:99;'})
                 script_element = mail_element.parent.find_all('script')[2]
                 parsed_javascript = re.findall(r'\'.*\'', script_element.string)
                 num = parsed_javascript[1].split(',')[0].replace('\'', '')
                 key = parsed_javascript[1].split(',')[1].replace('\'', '').replace(' ', '')
-                
                 response = poipoi_session.post('https://m.kuku.lu/smphone.app.recv.view.php', data={'num':num, 'key':key})
                 soup = BeautifulSoup(response.text, 'html.parser')
-                verify_redirect_url = soup.find('a', href=re.compile("gateway.aquapal.net/jump.php?", text="Verify Email")).attrs['href']
+                verify_redirect_url = soup.find('a', style=re.compile("border-color: #1bb394;")).attrs['href']
                 print(verify_redirect_url)
                 page.goto(verify_redirect_url)
                 page.wait_for_timeout(5500)

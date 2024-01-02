@@ -144,7 +144,7 @@ def bytedance():
                     page.get_by_test_id("download-button").click()
                 download = download_info.value
                 download.save_as(f"./proxy/{email}"+"-"+"proxy.txt")
-                print("[+] Success Save "+str({email})+"-"+"proxy.txt")
+                print("[+] Success Save "+email+"-"+"proxy.txt")
                 page.wait_for_timeout(2500)
             except Exception as error:
                 print(error)

@@ -44,9 +44,23 @@ def get_email():
     email = remove_string(response.text, 'OK:')
     return email
 
+#def randomproxy():
+#    proxylist = [
+#        "38.154.227.167:5868",
+#        "185.199.229.156:7492",
+#        "185.199.228.220:7300",
+#        "185.199.231.45:8382",
+#        "188.74.210.207:6286",
+#        "188.74.183.10:8279",
+#        "188.74.210.21:6100",
+#        "45.155.68.129:8133",
+#        "154.95.36.199:6893",
+#        "45.94.47.66:8110"
+#    ]
+#    return random.choice(proxylist)
+
 email = get_email()
 password = get_password()
-
 
 def recognize(audio_url: str) -> str:
     seg = AudioSegment.from_file(io.BytesIO(requests.get(audio_url).content))
@@ -63,10 +77,17 @@ def recognize(audio_url: str) -> str:
 
 def bytedance():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(
+            headless=False,
+			#proxy={
+            #    'server': randomproxy(),
+            #    'username': 'tbqtzwvt',
+            #    'password': '0woyt2sxytz5',
+            #}
+        )
         ctx = browser.new_context(locale="en-US")
         page = ctx.new_page()
-        page.goto("https://proxy2.webshare.io/register")
+        page.goto("https://proxy2.webshare.io/register") #https://proxy2.webshare.io/dashboard
         print("Creating...")
         page.get_by_test_id("email-input").click()
         page.get_by_test_id("email-input").fill(email)
@@ -112,7 +133,19 @@ def bytedance():
                 page.goto(verify_redirect_url)
                 page.wait_for_timeout(5500)
                 print("[+] Success Verify Account!!")
+                with open("account.txt", mode='a') as f:
+                    f.write(email+"|"+password+"\n")
                 page.wait_for_timeout(5500)
+                print("Download Proxy...")
+                page.goto("https://proxy2.webshare.io/proxy/list")
+                page.wait_for_timeout(4500)
+                page.get_by_role("button", name="DOWNLOAD").click()
+                with page.expect_download() as download_info:
+                    page.get_by_test_id("download-button").click()
+                download = download_info.value
+                download.save_as(f"./proxy/{email}"+"-"+"proxy.txt")
+                print("[+] Success Save "+str({email})+"-"+"proxy.txt")
+                page.wait_for_timeout(2500)
             except Exception as error:
                 print(error)
                 print("[-] Failed Verify Email\nPlease Self")

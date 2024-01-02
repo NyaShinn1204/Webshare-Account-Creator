@@ -148,7 +148,7 @@ def bytedance():
                 page.wait_for_timeout(2500)
             except Exception as error:
                 print(error)
-                print("[-] Failed Verify Email\nPlease Self")
+                print("[-] Error")
             print(f"[+] Email: {email}")
             print(f"[+] Password: {password}")
         except Exception as error:
